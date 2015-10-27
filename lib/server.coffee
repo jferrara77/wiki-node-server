@@ -260,9 +260,12 @@ module.exports = exports = (argv) ->
   # Can also be handled by the client, but it also sets up
   # the login status, and related footer html, which the client
   # relies on to know if it is logged in or not.
+  # FIXME: can i modify this get regex to not include the first part of the path as an urlPage or urlLocs??
+  # seems each of these app.get will need to modified to ignore the leading path element...
   app.get ///^((/[a-zA-Z0-9:.-]+/[a-z0-9-]+(_rev\d+)?)+)/?$///, (req, res) ->
     urlPages = (i for i in req.params[0].split('/') by 2)[1..]
     urlLocs = (j for j in req.params[0].split('/')[1..] by 2)
+
     info = {
       pages: []
       authenticated: is_authenticated(req)
@@ -287,7 +290,7 @@ module.exports = exports = (argv) ->
       if urlLocs[idx] is 'view'
         pageDiv = {page}
       else
-        pageDiv = {page, origin: """data-site=#{urlLocs[idx]}"""}
+        pageDiv = {page, origin: """data-site=#{urlLocs[idx]}"""} #FIXME: is this where the site data is encoded for the client?? seems so
       info.pages.push(pageDiv)
     res.render('static.html', info)
 
@@ -566,7 +569,6 @@ module.exports = exports = (argv) ->
     ### Sitemap ###
     # create sitemap at start-up
     sitemaphandler.createSitemap(pagehandler)
-
 
   # Return app when called, so that it can be watched for events and shutdown with .close() externally.
   app
